@@ -104,20 +104,33 @@ class MainHandler(webapp2.RequestHandler):
         pass_error=""
         pass_match_error=""
         email_error=""
+        isError = False
 
         if not self.valid_username(name):
             username_error='<p class="error">The users username is not valid</p>'
-            #self.error(username_error, pass_error, email_error)
+            isError = True
         if not self.valid_password(pas):
             pass_error = '<p class="error">The users password is not valid</p>'
-            #self.error(username_error, pass_error, email_error)
+            isError = True
         if   vp!=pas:
             pass_match_error = '<p class="error">The users password and password-confirmation do not match</p>'
+            isError = True
         if e != "" and not self.valid_email(e):
             email_error = '<p class="error">The user provides an email, but its not a valid email.</p>'
-            #self.error(username_error, pass_error, email_error)
-        self.write_form(username_error, pass_error, pass_match_error, email_error, name, e)
+            isError = True
+        if isError:
+            self.write_form(username_error, pass_error, pass_match_error, email_error, name, e)
+        else:
+            self.redirect("/welcome?username="+name)
+
+class Welcome(webapp2.RequestHandler):
+    def get(self):
+        username = self.request.get("username")
+        welcome= "Welcome, "+ username +"!"
+        welcome_msg = '<h1>' + welcome + '</h1>'
+        self.response.write(welcome_msg)
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/welcome', Welcome)
 ], debug=True)
